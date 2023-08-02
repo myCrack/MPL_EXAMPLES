@@ -5,10 +5,10 @@
 "control"     use
 "conventions" use
 
+"crtStdIo" use
 "duration" use
 
 (Natx Natx) Int32 {convention: cdecl; variadic: TRUE;} "fprintf" importFunction
-(Nat32) Natx {convention: cdecl;} "__acrt_iob_func" importFunction
 
 RandomLcg: [{
   private seed: 0n32;
@@ -25,19 +25,15 @@ RandomLcgIter: [{
 
 store: [
   name: time: toString addTerminator.chars.data storageAddress; makeStringView;
-  stderr: [2n32];
-  fdo: [stderr __acrt_iob_func];
 
   placeholder: [
     name:;
-    len: [19];
-
-    {next: [ascii.minus Nat8 cast TRUE];} name.size len < [len name.size -] [1] if [Nat8] headIter toArray
+    {next: [ascii.minus Nat8 cast TRUE];} name.size 19 < [19 name.size -] [1] if [Nat8] headIter toArray
   ];
 
   indent: name placeholder .span .stringView;
 
-  (time new) (name " " indent " %s\n\00") assembleString.data storageAddress fdo fprintf [2 >] "[C99.fprintf] filed" ensure
+  (time new) (name " " indent " %s\n\00") assembleString.data storageAddress stderr fprintf [-1 >] "[Crt.fprintf] filed" ensure
 ];
 
 # For C++ and so
